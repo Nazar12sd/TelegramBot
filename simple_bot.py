@@ -86,6 +86,14 @@ class SimpleTelegramBot:
         """
         self.send_message(chat_id, message.strip())
     
+    def handle_time(self, chat_id):
+        """Обработчик команды /время"""
+        import datetime
+        now = datetime.datetime.now()
+        current_time = now.strftime("%H:%M:%S, %d.%m.%Y")
+        message = f"🕐 Текущее время: {current_time}"
+        self.send_message(chat_id, message)
+    
     def handle_text_message(self, chat_id, user_name, text):
         """Обработчик текстовых сообщений"""
         text_lower = text.lower()
@@ -125,6 +133,8 @@ class SimpleTelegramBot:
                         self.handle_start(chat_id, user_name)
                     elif text == '/help':
                         self.handle_help(chat_id)
+                    elif text == '/время':
+                        self.handle_time(chat_id)
                     else:
                         self.handle_text_message(chat_id, user_name, text)
         except Exception as e:
