@@ -3,11 +3,9 @@
 Основной файл Telegram бота
 """
 
-import asyncio
 import logging
 import os
-from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, ExtBot
-from telegram import Update
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
 from config import BOT_TOKEN
 from handlers import start_command, help_command, handle_text_message, error_handler
 
@@ -22,28 +20,32 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-async def main():
+def main():
     """Главная функция для запуска бота"""
     try:
-        # Создаем приложение
+        # Создаем Updater
         logger.info("Запуск Telegram бота...")
         
-        application = Application.builder().token(BOT_TOKEN).build()
+        if not BOT_TOKEN:
+            raise ValueError("BOT_TOKEN не найден")
+        updater = Updater(token=BOT_TOKEN, use_context=True)
+        dispatcher = updater.dispatcher
         
         # Регистрируем обработчики команд
-        application.add_handler(CommandHandler("start", start_command))
-        application.add_handler(CommandHandler("help", help_command))
+        dispatcher.add_handler(CommandHandler("start", start_command))
+        dispatcher.add_handler(CommandHandler("help", help_command))
         
         # Регистрируем обработчик текстовых сообщений
-        application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_text_message))
+        dispatcher.add_handler(MessageHandler(Filters.text & ~Filters.command, handle_text_message))
         
         # Регистрируем обработчик ошибок
-        application.add_error_handler(error_handler)
+        dispatcher.add_error_handler(error_handler)
         
         logger.info("Бот успешно запущен и готов к работе!")
         
         # Запускаем бота
-        await application.run_polling(allowed_updates=Update.ALL_TYPES)
+        updater.start_polling()
+        updater.idle()
         
     except Exception as e:
         logger.error(f"Критическая ошибка при запуске бота: {e}")
@@ -51,7 +53,7 @@ async def main():
 
 if __name__ == "__main__":
     try:
-        asyncio.run(main())
+        main()
     except KeyboardInterrupt:
         logger.info("Бот остановлен пользователем")
     except Exception as e:

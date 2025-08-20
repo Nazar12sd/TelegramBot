@@ -4,12 +4,11 @@
 
 import logging
 from telegram import Update
-from telegram.ext import ContextTypes
-from telegram.constants import ParseMode
+from telegram.ext import CallbackContext
 
 logger = logging.getLogger(__name__)
 
-async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def start_command(update: Update, context: CallbackContext):
     """Обработчик команды /start"""
     try:
         user = update.effective_user
@@ -28,18 +27,18 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 Используйте /help для просмотра доступных команд.
         """
         
-        await update.message.reply_text(
+        update.message.reply_text(
             welcome_message.strip(),
-            parse_mode=ParseMode.HTML
+            parse_mode="HTML"
         )
         
     except Exception as e:
         logger.error(f"Ошибка в обработчике команды /start: {e}")
-        await update.message.reply_text(
+        update.message.reply_text(
             "Произошла ошибка при обработке команды. Попробуйте позже."
         )
 
-async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def help_command(update: Update, context: CallbackContext):
     """Обработчик команды /help"""
     try:
         user = update.effective_user
@@ -60,18 +59,18 @@ async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
 ❓ Если у вас есть вопросы, просто напишите мне!
         """
         
-        await update.message.reply_text(
+        update.message.reply_text(
             help_message.strip(),
-            parse_mode=ParseMode.HTML
+            parse_mode="HTML"
         )
         
     except Exception as e:
         logger.error(f"Ошибка в обработчике команды /help: {e}")
-        await update.message.reply_text(
+        update.message.reply_text(
             "Произошла ошибка при обработке команды. Попробуйте позже."
         )
 
-async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
+def handle_text_message(update: Update, context: CallbackContext):
     """Обработчик текстовых сообщений"""
     try:
         user = update.effective_user
@@ -105,22 +104,22 @@ async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE
                 f"Используйте /help для просмотра доступных команд."
             )
         
-        await update.message.reply_text(response)
+        update.message.reply_text(response)
         
     except Exception as e:
         logger.error(f"Ошибка в обработчике текстовых сообщений: {e}")
-        await update.message.reply_text(
+        update.message.reply_text(
             "Произошла ошибка при обработке вашего сообщения. Попробуйте позже."
         )
 
-async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE):
+def error_handler(update: object, context: CallbackContext):
     """Глобальный обработчик ошибок"""
     logger.error(f"Произошла ошибка: {context.error}")
     
     # Если ошибка связана с обновлением от пользователя
     if isinstance(update, Update) and update.effective_message:
         try:
-            await update.effective_message.reply_text(
+            update.effective_message.reply_text(
                 "Извините, произошла техническая ошибка. Пожалуйста, попробуйте позже."
             )
         except Exception as e:
